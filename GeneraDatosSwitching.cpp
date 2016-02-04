@@ -6,7 +6,7 @@
 /**Variables globales, sus valores no cambian a lo largo del programa**/
 unsigned long long int NIC = 100; // Es la cantidad de condiciones iniciales diferentes de los que se larga el atractor.
 
-/************HASTA ACÁ LLEGUÉ 3/2/2016*********************/
+/************HASTA ACÁ LLEGUÉ 3/2/2016**********************/
 
 int main(){
     float x_vec_s[20000];
