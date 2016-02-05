@@ -5,10 +5,11 @@
 
 /**Variables globales, sus valores no cambian a lo largo del programa**/
 unsigned long long int NIC = 100; // Es la cantidad de condiciones iniciales diferentes de los que se larga el atractor.
+unsigned int B[] = {2, 10}; // Vector con las bases que quiero probar
+unsigned int P[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30}
 
-/************HASTA ACÁ LLEGUÉ 3/2/2016**********************/
-
-int main(){
+int main()
+{
     float x_vec_s[20000];
     double x_vec_d[20000];
     double rand[1000];
