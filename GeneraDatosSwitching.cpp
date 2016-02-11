@@ -1,105 +1,73 @@
 #include <stdio.h>  //sprintf, FILE
 #include <string.h> //strcpy, strcat
-#include <math.h>   //pow
-#include <random>
-
-/**Variables globales, sus valores no cambian a lo largo del programa**/
-unsigned long long int NIC = 100; // Es la cantidad de condiciones iniciales diferentes de los que se larga el atractor.
-unsigned int B[] = {2, 10}; // Vector con las bases que quiero probar
-unsigned int P[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30}
+#include <math.h>   //pow, floor
+#include "maxiutils.h"  //tiene los cuantificadores
 
 int main()
 {
-    float x_vec_s[20000];
-    double x_vec_d[20000];
-    double rand[1000];
-    double digits;
-    char serie_str[32];
-    char P_str[8];
-    char j_str[8];
-    FILE* list_out=fopen("list.dat","w");
+    unsigned long int NIter = 100; // Es el largo de cada atractor
+    unsigned int NInitialConditions = 10; // Es la cantidad de condiciones iniciales diferentes de los que se larga el atractor.
+    double Bases[] = {2, 10}; // Vector con las bases que quiero probar
+    double Precisions[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30};
+    double InitialCondition; // Acá guardo la condición inicial sorteada
+    unsigned long int Bins = 100; // Cantidad de bines del histograma
+    unsigned long int DimEmb = 3; // Dimensión de embedding para MP, BP y BPW
+    FILE* results=fopen("resultados.dat","w"); // Abre archivo de resultados
 
+    double* Map; //Declare the pointer
+    Map = (double*) malloc (sizeof(double)*NIter+1); //Creates the array. It has one more postition at first for the length
+    Map[0]=NIter; //Save the vector length in the first position
 
-    /*********Lee un archivo con números random generado con matlab*****/
-    FILE* rand_in=fopen("rand.dat","r");
-    for (int i_rnd=0;i_rnd<1000;i_rnd++){
-        fscanf(rand_in,"%le",&rand[i_rnd]);
-    }
-    fclose(rand_in);
+    char NameFiles[32]; // Para armar los nombres de los archivos
 
-    for (int P=1;P<=15;P++){
-        digits=pow(10,(double)P);
+    int NBases = sizeof(Bases)/sizeof(Bases[0]); // Cantidad de bases
+    int NPrecisions = sizeof(Precisions)/sizeof(Precisions[0]); // Cantidad de precisiones
 
-        for (int j=0;j<1000;j++){
-            printf("%i\t%i\n",P,j);
-            /*Genera el nombre del archivo*/
-            sprintf(P_str,"%i",P);
-            sprintf(j_str,"%i",j+1);
-            strcpy(serie_str, "32_P");
-            strcat(serie_str,P_str);
-            strcat(serie_str,"_j");
-            strcat(serie_str,j_str);
-            strcat(serie_str,".dat");
+    double Scale; // Es la escala que utilizo para multiplicar y dividir en el floor
+    double InvScale; // Guardo acá la inversa de la escala para cambiar una división por una multiplicación en cada iteración del mapa
 
-            fprintf(list_out,"%s\n",serie_str);//Escribe el nombre del archivo en la lista
-            FILE* tent_32=fopen(serie_str,"w");//Abre el archivo para escibir el atractor
+    double Hhist, Qhist, Chist, Hbp, Qbp, Cbp, Hbpw, Qbpw, Cbpw, MP, Period; // Vectores en donde van guardados los cuantificadores
 
-            /*Carga las condiciones iniciales*/
-            x_vec_s[0]=floor(digits*rand[j])/digits;
+    for (int iInitialCondition = 0; iInitialCondition < NInitialConditions; iInitialCondition++) // Va sorteando condiciones iniciales
+    {
+        InitialCondition = rand()/RAND_MAX; // Sortea el primer valor del mapa, es una variable uniformemente distribuída entre 0 y 1
 
-            /*Itera el mapa en 32 bits*/
-            for (int i_vec=0;i_vec<20000;i_vec++){
-                fprintf(tent_32,"%.20E\n",x_vec_s[i_vec]);
-                if (x_vec_s[i_vec]<0.5) x_vec_s[i_vec+1]=2*x_vec_s[i_vec];
-                else x_vec_s[i_vec+1]=2*(floor(digits*(1-x_vec_s[i_vec]))/digits);
+        for (int iBases = 0; iBases <  NBases; iBases++) // Va recorriendo el vector de bases
+        {
+            for (int iPrecisions = 0; iPrecisions < NPrecisions; iPrecisions++) //Recorro el vector de precisiones
+            {
+                Scale = pow(Bases[iBases],Precisions[iPrecisions]); // powl sirve para long double
+                Map[1] = floor(Scale*InitialCondition)/Scale; // floorl sirve para long double, como son mapas positivos puedo usar floor en vez de round
+
+            for (unsigned long int iMap = 1; iMap < NIter; iMap++) // Va riterando el mapa logístico
+            {
+                Map[iMap+1] =  4*InvScale*floorl(Scale*Map[iMap]*(Map[iMap]-1)); // Mapa logístico, x[n] = r*x[n-1]*(1-x[n-1]), caótico con r=4
+            } // Acá ya tengo el atractor guardado en el vector Map
+
+            //Period = find_period(Map);
+
+            double* PDFhist=PDF_hist(Map,Bins); // Genera el histograma de patrones de órden
+            Hhist=entropy(PDFhist); // Le calcula la entropía
+            Qhist=disequilibrum(PDFhist); // Le calcula el desequilibrio
+            Chist=Hhist*Qhist; // Le calcula la complejidad
+            free(PDFhist); //Libera el vector que contiene al histograma
+
+            double* PDFbp=PDF_BP_CS(Map,DimEmb); // Genera el histograma de patrones de órden
+printf("Estoy vivo!");
+            Hbp=entropy(PDFbp); // Le calcula la entropía
+            Qbp=disequilibrum(PDFbp); // Le calcula el desequilibrio
+            Cbp=Hbp*Qbp; // Le calcula la complejidad
+            free(PDFbp); //Libera el vector que contiene al histograma
+
+            double* PDFbpw=PDF_BPW(Map,Bins); // Genera el histograma de patrones de órden
+            Hbpw=entropy(PDFbpw); // Le calcula la entropía
+            Qbpw=disequilibrum(PDFbpw); // Le calcula el desequilibrio
+            Cbpw=Hbpw*Qbpw; // Le calcula la complejidad
+            free(PDFbpw); //Libera el vector que contiene al histograma
+
+            fprintf(results,"%.16e\t%.16e\t%.16e\t%.16e\t%.16e\t%.16e\t%.16e\t%.16e\t%.16e\t%.16e\t%.16e\t%.16e%.16e\n", Bases[iBases], Precisions[iPrecisions], Hhist, Qhist, Chist, Hbp, Qbp, Cbp, Hbpw, Qbpw, Cbpw, MP, Period); //Guarda el valor en el archivo de salida
             }
-            fprintf(tent_32,"%.20E",x_vec_s[19999]);
-            fclose(tent_32);
-
         }
     }
-    fclose(list_out);
-
-    /**Para ver como levanta los datos con presiciones distintas**
-    x_vec_s[0]=rand[0];
-    x_vec_d[0]=rand[0];
-
-    printf("%.16e\n",rand[0]);
-    printf("%.16e\n",x_vec_s[0]);
-    printf("%.16e\n",x_vec_d[0]);
-/**/
-
-
-/**Para ver como itera los datos con presisciones distintas**
-    FILE* SD_out=fopen("SimpleDecimal.dat","w");
-    FILE* SH_out=fopen("SimpleHexa.dat","w");
-    FILE* DD_out=fopen("DobleDecimal.dat","w");
-    FILE* DH_out=fopen("DobleHexa.dat","w");
-
-
-    for (int i_vec=0;i_vec<98;i_vec++){
-
-        if (x_vec_s[i_vec]<.5) x_vec_s[i_vec+1]=2*x_vec_s[i_vec];
-        else x_vec_s[i_vec+1]=2*(1-x_vec_s[i_vec]);
-        fprintf(SD_out,"%.20E\n",x_vec_s[i_vec]);
-        fprintf(SH_out,"%.20A\n",x_vec_s[i_vec]);
-
-        if (x_vec_d[i_vec]<.5) x_vec_d[i_vec+1]=2*x_vec_d[i_vec];
-        else x_vec_d[i_vec+1]=2*(1-x_vec_d[i_vec]);
-        fprintf(DD_out,"%.20E\n",x_vec_d[i_vec]);
-        fprintf(DH_out,"%.20A\n",x_vec_d[i_vec]);
-
-    }
-
-    fprintf(SD_out,"%.20E\n",x_vec_s[99]);
-    fprintf(SH_out,"%.20A\n",x_vec_s[99]);
-
-    fprintf(DD_out,"%.20lE\n",(double)x_vec_d[99]);
-    fprintf(DH_out,"%.20A\n",(double)x_vec_d[99]);
-
-    fclose(SD_out);
-    fclose(SH_out);
-    fclose(DD_out);
-    fclose(DH_out);
-/**/
+    fclose(results);
 }
