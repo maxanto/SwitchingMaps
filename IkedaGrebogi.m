@@ -14,7 +14,7 @@ B = .9;
 kappa = .4;
 alpha = 6;
 InitCond = .1 + .1i; %Condición inicial para iterar el mapa, sirve para todas las precisiones
-epsilons = logspace(-7,-2,300); %Vector de precisiones
+epsilons = logspace(-6,-2,300); %Vector de precisiones
 
 %% Itera el mapa hasta encontrar el período para todas las precisiones
 
@@ -49,6 +49,9 @@ for epsilon = epsilons %Por cada bucle epsilon va tomando los valores del vector
     
 end
 
+%% Guardo los resultados
+
+save('IkedaGrebogiResults','epsilons','Periods','TotalElapsedTime');
 %% Muestro resultados
 
 % Create figure
