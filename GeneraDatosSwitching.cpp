@@ -2,6 +2,7 @@
 #include <string.h> //strcpy, strcat
 #include <math.h>   //pow, floor
 #include "maxiutils.h"  //tiene los cuantificadores
+#include <time.h>   //time
 
 int main()
 {
@@ -28,7 +29,7 @@ int main()
 
     for (int iInitialCondition = 0; iInitialCondition < NInitialConditions; iInitialCondition++) // Va sorteando condiciones iniciales
     {
-        double InitialCondition = rand()/RAND_MAX; // Sortea el primer valor del mapa, es una variable uniformemente distribuída entre 0 y 1
+        double InitialCondition = (double)rand()/(double)RAND_MAX; // Sortea el primer valor del mapa, es una variable uniformemente distribuída entre 0 y 1
 
         for (int iBases = 0; iBases <  NBases; iBases++) // Va recorriendo el vector de bases
         {
@@ -62,7 +63,7 @@ int main()
                 Cbpw=Hbpw*Qbpw; // Le calcula la complejidad
                 free(PDFbpw); //Libera el vector que contiene al histograma
 
-                fprintf(results,"%.8e\t%.0f\t%.0f\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.0f%.0f\n", InitialCondition, Bases[iBases], Precisions[iPrecisions], Hhist, Qhist, Chist, Hbp, Qbp, Cbp, Hbpw, Qbpw, Cbpw, MP, Period); //Guarda los valores en el archivo de salida
+                fprintf(results,"%.8e\t%.0f\t%.0f\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.0f%.0f\n", InitialCondition, Bases[iBases], Precisions[iPrecisions], Hhist, Qhist, Chist, Hbp, Qbp, Cbp, Hbpw, Qbpw, Cbpw, MP, Period); //Guarda los valores en el archivo de salida, escribo la condición inicial para evaluar el comportamiento del rand()
             }
         }
     }
