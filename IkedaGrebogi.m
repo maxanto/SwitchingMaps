@@ -49,9 +49,13 @@ for epsilon = epsilons %Por cada bucle epsilon va tomando los valores del vector
     
 end
 
+SpectedPeriod=epsilons.^-0.835; %.0835 es la mitad de la dimensión de correlación
+
+FittedCorrelationDimention=polyfit(log10(epsilons),log10(Periods),1); %Halla la dimensión de correlación para los puntos hallados
+FittedPeriod=epsilons.^FittedCorrelationDimention(1); %Halla los períodos promediados
 %% Guardo los resultados
 
-save('IkedaGrebogiResults','epsilons','Periods','TotalElapsedTime');
+save('IkedaGrebogiResults','epsilons','Periods','TotalElapsedTime','SpectedPeriod','FittedCorrelationDimention','FittedPeriod');
 %% Muestro resultados
 
 % Create figure
@@ -67,3 +71,8 @@ ylabel('m');
 
 % Create semilogy
 loglog(epsilons,Periods,'Marker','.','LineStyle','none');
+
+% Agrego el período esperado y el calculado
+hold on;
+loglog(epsilons,SpectedPeriod);
+loglog(epsilons,FittedPeriod);
