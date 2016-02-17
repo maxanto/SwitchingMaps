@@ -6,12 +6,12 @@
 
 int main()
 {
-    unsigned long int NIter = 100; // Es el largo de cada atractor
+    unsigned long int NIter = 10000; // Es el largo de cada atractor
     unsigned int NInitialConditions = 2; // Es la cantidad de condiciones iniciales diferentes de los que se larga el atractor.
     double Bases[] = {2, 10}; // Vector con las bases que quiero probar
-    double Precisions[] = {1, 2}; //, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30}; //Contiene todas las precisiones que voy barriendo
-    unsigned long int Bins = 10; // Cantidad de bines del histograma
-    unsigned long int DimEmb = 3; // Dimensión de embedding para MP, BP y BPW
+    double Precisions[] = {3, 4}; //, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30}; //Contiene todas las precisiones que voy barriendo
+    unsigned long int Bins = 1024; // Cantidad de bines del histograma
+    unsigned long int DimEmb = 6; // Dimensión de embedding para MP, BP y BPW
 
     double InitialConditions[NInitialConditions]; // Declaro el vector de condiciones iniciales
 
@@ -72,17 +72,17 @@ int main()
 
 
                 //Period = find_period(Map); //Tengo que hacer esta función!!!!!!!!!!!
-printf("\t\ta\n"); // Para debuguear
+printf("\t\t\t\tMapa en memoria\n"); // Para debuguear
                 double* PDFhist = PDF_hist(Map,Bins); // Genera el histograma de patrones de órden
-printf("\t\tb\n"); // Para debuguear
+printf("\t\t\t\tArmado histograma de valores\n"); // Para debuguear
                 Hhist = Hhist + entropy(PDFhist); // Le calcula la entropía y la suma para el promedio
-printf("\t\tc\n"); // Para debuguear
+printf("\t\t\t\tHhist=%le\n",Hhist); // Para debuguear
                 Qhist = Qhist + disequilibrum(PDFhist); // Le calcula el desequilibrio
-printf("\t\td\n"); // Para debuguear
+printf("\t\t\t\tQhist=%le\n",Qhist); // Para debuguear
                 Chist = Chist + Hhist*Qhist; // Le calcula la complejidad
-printf("\t\te\n"); // Para debuguear
+printf("\t\t\t\tChist=%le\n",Chist); // Para debuguear
                 free(PDFhist); // Libera el vector que contiene al histograma
-printf("\t\tf\n"); // Para debuguear
+printf("\t\t\t\tLiberada la memoria ocupada por PDFhist\n"); // Para debuguear
 
                 double* PDFbp = PDF_BP_CS(Map,DimEmb); // Genera el histograma de patrones de órden
                 Hbp = Hbp + entropy(PDFbp); // Le calcula la entropía
