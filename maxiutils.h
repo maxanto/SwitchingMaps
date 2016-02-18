@@ -376,14 +376,14 @@ double entropy(double PDF_vec[]){
     /***Cambio el código para calcular la entropía sin normalizar**/
     unsigned long int length=PDF_vec[0];
     double S=0;
-    //double S_e=log2((double)length);
-    //double H;
+    double S_e=log2((double)length);
+    double H;
 
     for (unsigned long int i_PDF=1;i_PDF<=length;i_PDF++) if (PDF_vec[i_PDF]!=0) S-=PDF_vec[i_PDF]*log2(PDF_vec[i_PDF]);
 
-    //H=S/S_e;
+    H=S/S_e;
 
-    return S;
+    return H;
 }
 
 double disequilibrum(double PDF_vec[]){

@@ -73,8 +73,16 @@ int main()
 
                 //Period = find_period(Map); //Tengo que hacer esta función!!!!!!!!!!!
 printf("\t\t\t\tMapa en memoria\n"); // Para debuguear
+
+sprintf(StrAux,"Mapa%d.dat",(int)iInitialCondition+1);
+save_vector(Map, StrAux);
+
                 double* PDFhist = PDF_hist(Map,Bins); // Genera el histograma de patrones de órden
 printf("\t\t\t\tArmado histograma de valores\n"); // Para debuguear
+
+sprintf(StrAux,"Hist%d.dat",(int)iInitialCondition+1);
+save_vector(PDFhist, StrAux);
+
                 Hhist = Hhist + entropy(PDFhist); // Le calcula la entropía y la suma para el promedio
 printf("\t\t\t\tHhist=%le\n",Hhist); // Para debuguear
                 Qhist = Qhist + disequilibrum(PDFhist); // Le calcula el desequilibrio
