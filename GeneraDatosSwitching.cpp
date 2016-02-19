@@ -3,15 +3,21 @@
 #include <math.h>   //pow, floor
 #include "maxiutils.h"  //tiene los cuantificadores
 #include <time.h>   //time
+#include <random>
+
+using namespace std; // Agrego el espacio de nombres del estandar de C++, zafo de poner std:: adelante de cada línea.
 
 int main()
 {
-    unsigned long int NIter = 10000; // Es el largo de cada atractor
+    mt19937_64 gen(0); // Creo un objeto del tipo mt19937 en presición double con semilla en 0
+    uniform_real_distribution<double> dist(0, 1); // Defino el tipo de distribución
+
+    unsigned long int NIter = 100; // Es el largo de cada atractor
     unsigned int NInitialConditions = 2; // Es la cantidad de condiciones iniciales diferentes de los que se larga el atractor.
     double Bases[] = {2, 10}; // Vector con las bases que quiero probar
     double Precisions[] = {3, 4}; //, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30}; //Contiene todas las precisiones que voy barriendo
-    unsigned long int Bins = 1024; // Cantidad de bines del histograma
-    unsigned long int DimEmb = 6; // Dimensión de embedding para MP, BP y BPW
+    unsigned long int Bins = 100; // Cantidad de bines del histograma
+    unsigned long int DimEmb = 3; // Dimensión de embedding para MP, BP y BPW
 
     double InitialConditions[NInitialConditions]; // Declaro el vector de condiciones iniciales
 
@@ -30,7 +36,7 @@ int main()
 
     for (int iInitialCondition = 0; iInitialCondition < NInitialConditions; iInitialCondition++) // Lleno un vector de condiciones iniciales
     {
-        InitialConditions[iInitialCondition] = (double)rand()/(double)RAND_MAX; // Sortea el primer valor del mapa, es una variable uniformemente distribuída entre 0 y 1
+        InitialConditions[iInitialCondition] = dist(gen); // Sortea el primer valor del mapa, es una variable uniformemente distribuída entre 0 y 1
     }
     printf("Generated %lu initial conditions\n", NInitialConditions);
 
@@ -67,7 +73,7 @@ int main()
 
                 for (unsigned long int iMap = 1; iMap < NIter; iMap++) // Va riterando el mapa logístico
                 {
-                    Map[iMap+1] =  4*InvScale*floorl(Scale*Map[iMap]*(Map[iMap]-1)); // Mapa logístico, x[n] = r*x[n-1]*(1-x[n-1]), caótico con r=4
+                    Map[iMap+1] =  4*Map[iMap]*(1-Map[iMap]); // Mapa logístico, x[n] = r*x[n-1]*(1-x[n-1]), caótico con r=4
                 } // Acá ya tengo el atractor guardado en el vector Map
 
 
