@@ -4,6 +4,7 @@
 #include "maxiutils.h"  //tiene los cuantificadores
 #include <time.h>   //time
 #include <random>
+#include <conio.h> //getch
 
 using namespace std; // Agrego el espacio de nombres del estandar de C++, zafo de poner std:: adelante de cada línea.
 
@@ -12,12 +13,12 @@ int main()
     mt19937_64 gen(0); // Creo un objeto del tipo mt19937 en presición double con semilla en 0
     uniform_real_distribution<double> dist(0, 1); // Defino el tipo de distribución
 
-    unsigned long int NIter = 100; // Es el largo de cada atractor
-    unsigned int NInitialConditions = 2; // Es la cantidad de condiciones iniciales diferentes de los que se larga el atractor.
+    unsigned long int NIter = 30000000; // Es el largo de cada atractor
+    unsigned int NInitialConditions = 50; // Es la cantidad de condiciones iniciales diferentes de los que se larga el atractor.
     double Bases[] = {2, 10}; // Vector con las bases que quiero probar
-    double Precisions[] = {3, 4}; //, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30}; //Contiene todas las precisiones que voy barriendo
-    unsigned long int Bins = 100; // Cantidad de bines del histograma
-    unsigned long int DimEmb = 3; // Dimensión de embedding para MP, BP y BPW
+    double Precisions[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30}; //Contiene todas las precisiones que voy barriendo
+    unsigned long int Bins = 65536; // Cantidad de bines del histograma
+    unsigned long int DimEmb = 6; // Dimensión de embedding para MP, BP y BPW
 
     double InitialConditions[NInitialConditions]; // Declaro el vector de condiciones iniciales
 
@@ -77,32 +78,17 @@ int main()
                     Map[iMap+1] =  4*InvScale*floor(Scale*Map[iMap]*(1-Map[iMap])); // Mapa logístico, x[n] = r*x[n-1]*(1-x[n-1]), caótico con r=4. Ni la resta ni la multiplicación por un entero generan fraccionarios
                 } // Acá ya tengo el atractor guardado en el vector Map
 
-
-                //Period = find_period(Map); //Tengo que hacer esta función!!!!!!!!!!!
-printf("\t\t\t\tMapa en memoria\n"); // Para debuguear
-
-sprintf(StrAux,"Mapa%d.dat",(int)iInitialCondition+1);
-save_vector(Map, StrAux);
-
                 double* PDFhist = PDF_hist(Map,Bins); // Genera el histograma de patrones de órden
-printf("\t\t\t\tArmado histograma de valores\n"); // Para debuguear
-
-sprintf(StrAux,"Hist%d.dat",(int)iInitialCondition+1);
-save_vector(PDFhist, StrAux);
-
                 Hhist = Hhist + entropy(PDFhist); // Le calcula la entropía y la suma para el promedio
-printf("\t\t\t\tHhist=%le\n",Hhist); // Para debuguear
                 Qhist = Qhist + disequilibrum(PDFhist); // Le calcula el desequilibrio
-printf("\t\t\t\tQhist=%le\n",Qhist); // Para debuguear
                 Chist = Chist + Hhist*Qhist; // Le calcula la complejidad
-printf("\t\t\t\tChist=%le\n",Chist); // Para debuguear
                 free(PDFhist); // Libera el vector que contiene al histograma
-printf("\t\t\t\tLiberada la memoria ocupada por PDFhist\n"); // Para debuguear
 
                 double* PDFbp = PDF_BP_CS(Map,DimEmb); // Genera el histograma de patrones de órden
                 Hbp = Hbp + entropy(PDFbp); // Le calcula la entropía
                 Qbp = Qbp + disequilibrum(PDFbp); // Le calcula el desequilibrio
                 Cbp = Cbp + Hbp*Qbp; // Le calcula la complejidad
+                MP = MP + (double)missing_patterns(PDFbp);
                 free(PDFbp); // Libera el vector que contiene al histograma
 
                 double* PDFbpw = PDF_BPW(Map,DimEmb); // Genera el histograma de patrones de órden
@@ -110,6 +96,8 @@ printf("\t\t\t\tLiberada la memoria ocupada por PDFhist\n"); // Para debuguear
                 Qbpw = Qbpw + disequilibrum(PDFbpw); // Le calcula el desequilibrio
                 Cbpw = Cbpw + Hbpw*Qbpw; // Le calcula la complejidad
                 free(PDFbpw); // Libera el vector que contiene al histograma
+
+                Period = Period + (double)find_period(Map);
             }
 
             Hhist = Hhist/(double)NInitialConditions;
@@ -123,9 +111,12 @@ printf("\t\t\t\tLiberada la memoria ocupada por PDFhist\n"); // Para debuguear
             Cbpw = Cbpw/(double)NInitialConditions;
             MP = MP/(double)NInitialConditions;
             Period = Period/(double)NInitialConditions;
-            fprintf(Results,"%.0f\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%d\t%d\n", Precisions[iPrecisions], Hhist, Qhist, Chist, Hbp, Qbp, Cbp, Hbpw, Qbpw, Cbpw, (unsigned long int)MP, (unsigned long int)Period); //Guarda los valores en el archivo de salida, escribo la condición inicial para evaluar el comportamiento del rand()
+
+            fprintf(Results,"%.0f\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\t%.8e\n", Precisions[iPrecisions], Hhist, Qhist, Chist, Hbp, Qbp, Cbp, Hbpw, Qbpw, Cbpw, MP, Period); //Guarda los valores en el archivo de salida, escribo la condición inicial para evaluar el comportamiento del rand()
 
         }
         fclose(Results); // Cierra el archivo de salida, queda un archivo por base para este oscilador
     }
+    printf("\nPresionar una tecla");
+    getch(); //Avisa que terminó y espera una tecla
 }

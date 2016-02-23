@@ -391,7 +391,7 @@ double disequilibrum(double PDF_vec[]){
     unsigned long int length=PDF_vec[0];
     double inv_length=1/(double)length;
     double Q;
- //   double Q0=-(((double)length+1)*log2((double)length+1)-2*(double)length*log2(2*(double)length)+(double)length*log2((double)length))/(2*(double)length);
+    double Q0=-(((double)length+1)*log2((double)length+1)-2*(double)length*log2(2*(double)length)+(double)length*log2((double)length))/(2*(double)length);
     double P_prom;
     double S_prom=0;
     double S_eq=log2((double)length);
@@ -404,9 +404,39 @@ double disequilibrum(double PDF_vec[]){
         if (PDF_vec[i_PDF]!=0) S_p-=PDF_vec[i_PDF]*log2(PDF_vec[i_PDF]);
     }
 
-    Q=(S_prom-0.5*S_eq-0.5*S_p);//Q0;
+    Q=(S_prom-0.5*S_eq-0.5*S_p)/Q0;
 
     return Q;
+}
+
+unsigned long int find_period(double x_vec[])
+{
+/******************************************************
+Returns lenght of ventor imputs period
+
+Parameters:
+    x_vec is the input vector in double presition. The first position must be
+    the length of the vector (x_vec[0]=length_x_vec).
+
+Returned value:
+    Period is the iterations needed for a loop
+
+Caution:
+    Only for unidimentional maps
+*******************************************************/
+
+    unsigned long int length=x_vec[0];
+    double UltimoValor = x_vec[length];
+
+    for (unsigned long int iVec = length-1; iVec > 0; iVec--)
+    {
+        if (x_vec[iVec] == UltimoValor)
+        {
+            return length - iVec;
+        }
+    }
+
+   return 0;
 }
 
 /*double* load_vector(char name_file[]){
